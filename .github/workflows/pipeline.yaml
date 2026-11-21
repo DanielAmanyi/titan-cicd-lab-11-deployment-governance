@@ -1,0 +1,89 @@
+
+name: Lab 11 Pipeline
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Your build steps go here
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install build dependencies
+        run: pip install build
+      - name: Build the package
+        run: python -m build
+      - name: Record build artifact checksums
+        run: sha256sum dist/* | sort -k2
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-package
+          path: dist/
+          if-no-files-found: error
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Your pytest steps go here
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: pip install pytest
+      - name: Run tests
+        run: pytest
+
+  deploy-staging:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: 
+      name: staging
+    steps:
+      # Download and verify the artifact
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: python-package
+          path: dist/
+      - name: Verify promoted artifact
+        run: |
+          set -euo pipefail
+          test -f dist/calculator-1.0.0-py3-none-any.whl
+          test -f dist/calculator-1.0.0.tar.gz
+          ls -lh dist/
+          sha256sum dist/* | sort -k2 
+      - name: Simulate staging deployment
+        run: echo "Simulating deployment to staging environment"
+
+  deploy-production:
+    needs: deploy-staging
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+    steps:
+      # Download and verify the artifact
+      - name: Download build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: python-package
+          path: dist/
+      - name: Verify promoted artifact
+        run: |
+          test -f dist/calculator-1.0.0-py3-none-any.whl
+          test -f dist/calculator-1.0.0.tar.gz
+          ls -lh dist/
+          sha256sum dist/* | sort -k2
+      - name: Simulate production deployment
+        run: echo "Simulating deployment to production environment"
