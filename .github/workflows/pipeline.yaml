@@ -63,6 +63,12 @@ jobs:
           test -f dist/calculator-1.0.0.tar.gz
           ls -lh dist/
           sha256sum dist/* | sort -k2 
+      - name: Verify repository-level marker
+        env:
+          LAB11_DEPLOY_MARKER: ${{ secrets.LAB11_DEPLOY_MARKER }}
+        run: |
+          test "$LAB11_DEPLOY_MARKER" = "repository-demo-value"
+          echo "Repository-level marker is accessible"
       - name: Simulate staging deployment
         run: echo "Simulating deployment to staging environment"
 
@@ -85,5 +91,11 @@ jobs:
           test -f dist/calculator-1.0.0.tar.gz
           ls -lh dist/
           sha256sum dist/* | sort -k2
+      - name: Verify repository-level marker
+        env:
+          LAB11_DEPLOY_MARKER: ${{ secrets.LAB11_DEPLOY_MARKER }}
+        run: |
+          test "$LAB11_DEPLOY_MARKER" = "repository-demo-value"
+          echo "Repository-level marker is accessible"
       - name: Simulate production deployment
         run: echo "Simulating deployment to production environment"
