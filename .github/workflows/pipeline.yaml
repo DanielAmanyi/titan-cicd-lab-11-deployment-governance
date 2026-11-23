@@ -97,5 +97,5 @@ jobs:
         run: |
           test "$LAB11_DEPLOY_MARKER" = "repository-demo-value"
           echo "Repository-level marker is accessible"
-      - name: Simulate production deployment
+      - name: Simulate production deployment by admin
         run: echo "Simulating deployment to production environment"
