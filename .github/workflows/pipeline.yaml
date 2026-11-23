@@ -54,7 +54,7 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v8
         with:
-          name: python-package checkout
+          name: python-package
           path: dist/
       - name: Verify promoted artifact
         run: |
