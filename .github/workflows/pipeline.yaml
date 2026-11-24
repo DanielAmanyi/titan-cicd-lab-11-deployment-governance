@@ -76,7 +76,8 @@ jobs:
     needs: deploy-staging
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
- 
+     environment:
+       name: production
     steps:
       # Download and verify the artifact
       - name: Download build artifacts
